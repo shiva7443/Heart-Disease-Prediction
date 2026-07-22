@@ -1,0 +1,57 @@
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+
+from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import StandardScaler
+from sklearn.linear_model import LogisticRegression
+from sklearn.metrics import accuracy_score, confusion_matrix, classification_report
+
+# Load Dataset
+data = pd.read_csv("heart.csv")
+
+# Features and Target
+X = data.drop("target", axis=1)
+y = data["target"]
+
+# Split Data
+X_train, X_test, y_train, y_test = train_test_split(
+    X, y, test_size=0.2, random_state=42
+)
+
+# Feature Scaling
+scaler = StandardScaler()
+X_train = scaler.fit_transform(X_train)
+X_test = scaler.transform(X_test)
+
+# Train Model
+model = LogisticRegression(max_iter=1000)
+model.fit(X_train, y_train)
+
+# Prediction
+y_pred = model.predict(X_test)
+
+# Accuracy
+print("Accuracy:", accuracy_score(y_test, y_pred))
+
+# Confusion Matrix
+print(confusion_matrix(y_test, y_pred))
+
+# Classification Report
+print(classification_report(y_test, y_pred))
+
+# Predict New Patient
+sample = np.array([[52,1,2,140,230,0,1,150,0,1.2,2,0,2]])
+sample = scaler.transform(sample)
+
+prediction = model.predict(sample)
+
+if prediction[0] == 1:
+    print("Heart Disease Detected")
+else:
+    print("No Heart Disease")
+
+# Feature Importance
+importance = pd.Series(model.coef_[0], index=X.columns)
+importance.sort_values().plot(kind="barh", figsize=(8,6))
+plt.show()
